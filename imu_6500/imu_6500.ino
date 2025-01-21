@@ -30,7 +30,7 @@ void loop() {
 
   while(Wire.available()){
     int16_t acc_x = Wire.read() << 8 | Wire.read();
-    Serial.println(acc_x, DEC);
+    Serial.print("aX = "); Serial.println(acc_x, DEC);
   }
 
   Wire.beginTransmission(MPU_addr);
@@ -41,7 +41,7 @@ void loop() {
 
   while(Wire.available()){
     int16_t acc_y = Wire.read() << 8 | Wire.read();
-    Serial.println(acc_y, DEC);
+    Serial.print("aY = "); Serial.println(acc_y, DEC);
   }
 
   Wire.beginTransmission(MPU_addr);
@@ -52,29 +52,43 @@ void loop() {
 
   while(Wire.available()){
     int16_t acc_z = Wire.read() << 8 | Wire.read();
-    Serial.println(acc_z, DEC);
+    Serial.print("aZ = "); Serial.println(acc_z, DEC);
   }
 
-  // Wire.requestFrom(MPU_addr, 2);
+  //poll Gyro 
 
-  // while(Wire.available()){
-  //   int16_t acc_y = Wire.read() << 8 | Wire.read();
-  //   Serial.println(acc_y, DEC);
-  // }
+  Wire.beginTransmission(MPU_addr);
+  Wire.write(0x43);
+  Wire.endTransmission();
+
+  Wire.requestFrom(MPU_addr, 2);
+
+  while(Wire.available()){
+    int16_t gyro_x = Wire.read() << 8 | Wire.read();
+    Serial.print("gX = "); Serial.println(gyro_x);
+  }
+
+  Wire.beginTransmission(MPU_addr);
+  Wire.write(0x45);
+  Wire.endTransmission();
+
+  Wire.requestFrom(MPU_addr, 2);
+
+  while(Wire.available()){
+    int16_t gyro_y = Wire.read() << 8 | Wire.read();
+    Serial.print("gY = "); Serial.println(gyro_y);
+  }
+
+  Wire.beginTransmission(MPU_addr);
+  Wire.write(0x47);
+  Wire.endTransmission();
+
+  Wire.requestFrom(MPU_addr, 2);
+
+  while(Wire.available()){
+    int16_t gyro_z = Wire.read() << 8 | Wire.read();
+    Serial.print("gZ = "); Serial.println(gyro_z); 
+  }
 
   delay(500);
-  // void get_ACC_X();  // получаем
-  // // выводим 
-  // Serial.print(acc_X_data);
-  // Serial.println();
-  // delay(200);
-  // Wire.endTransmission();
 }
-
-// void get_ACC_X(){
-//   Wire.beginTransmission(MPU_addr);
-//   Wire.write(0x3C);
-//   Wire.endTransmission(false);
-//   Wire.requestFrom(MPU_addr, 1, true);
-//   acc_X_data = Wire.read();
-// }
