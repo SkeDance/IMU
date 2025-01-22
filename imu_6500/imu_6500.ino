@@ -1,4 +1,8 @@
 #include "Wire.h"
+
+
+#define F_CPU 16000000UL
+
 const int MPU_addr = 0x68; // адрес датчика
 // массив данных
 // [accX, accY, accZ, temp, gyrX, gyrY, gyrZ]
@@ -11,7 +15,8 @@ int16_t gyro_X_data;
 int16_t gyro_Y_data;
 int16_t gyro_Z_data;
 
-volatile int z = 0;
+volatile int flag = 0;
+volatile float OCR1 = 0;
 
 void getAccelX(){
   Wire.beginTransmission(MPU_addr);
@@ -92,19 +97,23 @@ void getGyroZ(){
 }
 
 void setup() {
-  // инициализация
-  Wire.begin();
-  Wire.beginTransmission(MPU_addr);
-  Wire.write(0x6B);  // PWR_MGMT_1 register
-  Wire.write(0);     // set to zero (wakes up the MPU-6050)
-  Wire.endTransmission(true);
-  
-  Serial.begin(9600);
-  InitTimer();
-  interrupts();
+
+  //noInterrupts();
+
+  InitMPU();
+  sei();
+  InitTimer(0.1);
+
   pinMode(7, OUTPUT);
+
+  Serial.begin(9600);
+
+  
 }
 void loop() {
+  //float test = 0.1 / 0.000064;
+  // Serial.println(OCR1);
+  if(flag == 3){
   //poll Accelerometr
   getAccelX();
   getAccelY();
@@ -114,23 +123,41 @@ void loop() {
   getGyroX();
   getGyroY();
   getGyroZ();
-  
 
-  delay(100);
-}
-
-void InitTimer(){
-  TCCR1B = (1 << CS12) | (0 << CS11) | (1 << CS10); // 1024 prescaler
-  TCNT1 = 0;
-  TIMSK1 = (1 << TOIE1);
-}
-
-ISR(TIMER1_OVF_vect){
-  z++;
-  if(z == 10){
-    z = 0;
-    digitalWrite(7, digitalRead(7) ^ 1);
-
+  flag = 0;
   }
+  
+}
+
+void InitTimer(float time){
+  TCCR1A = 0;
+  TCCR1B = (1 << WGM12); // Compare mode
+  TCCR1B = (1 << CS12) | (0 << CS11) | (1 << CS10); // 1024 prescaler
+  OCR1A = Timer1ClockSetup(time);
+  TIMSK1 = (1 << OCIE1A); // enable compare interrupts
+}
+
+ISR(TIMER1_COMPA_vect){
+  flag++;
+  if(flag == 3){
+    //led for interrupt test
+    digitalWrite(7, digitalRead(7) ^ 1);
+  }
+}
+
+void InitMPU(){
+  Wire.begin();
+  Wire.beginTransmission(MPU_addr);
+  Wire.write(0x6B);  // PWR_MGMT_1 register
+  Wire.write(0);     // set to zero (wakes up the MPU-6050)
+  Wire.endTransmission(true);
+}
+
+float Timer1ClockSetup(float time){
+  float resolution = (1 / (F_CPU / 1024));
+  OCR1 = 1 / 15625;//(time / resolution); //(1 / (F_CPU / 1024));
+  Serial.println(OCR1);
+  return OCR1;
+  //set ocr1a to 15625
 }
 
