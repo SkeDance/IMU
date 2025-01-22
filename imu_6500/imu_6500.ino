@@ -11,6 +11,84 @@ int16_t gyro_X_data;
 int16_t gyro_Y_data;
 int16_t gyro_Z_data;
 
+void getAccelX(){
+  Wire.beginTransmission(MPU_addr);
+  Wire.write(0x3b);
+  Wire.endTransmission();
+
+  Wire.requestFrom(MPU_addr, 2);
+
+  while(Wire.available()){
+    int16_t acc_x = Wire.read() << 8 | Wire.read();
+    Serial.print("aX = "); Serial.println(acc_x, DEC);
+  }
+}
+
+void getAccelY(){
+  Wire.beginTransmission(MPU_addr);
+  Wire.write(0x3D);
+  Wire.endTransmission();
+
+  Wire.requestFrom(MPU_addr, 2);
+
+  while(Wire.available()){
+    int16_t acc_y = Wire.read() << 8 | Wire.read();
+    Serial.print("aY = "); Serial.println(acc_y, DEC);
+  }
+}
+
+void getAccelZ(){
+  Wire.beginTransmission(MPU_addr);
+  Wire.write(0x3F);
+  Wire.endTransmission();
+
+  Wire.requestFrom(MPU_addr, 2);
+
+  while(Wire.available()){
+    int16_t acc_z = Wire.read() << 8 | Wire.read();
+    Serial.print("aZ = "); Serial.println(acc_z, DEC);
+  }
+}
+
+void getGyroX(){
+  Wire.beginTransmission(MPU_addr);
+  Wire.write(0x43);
+  Wire.endTransmission();
+
+  Wire.requestFrom(MPU_addr, 2);
+
+  while(Wire.available()){
+    int16_t gyro_x = Wire.read() << 8 | Wire.read();
+    Serial.print("gX = "); Serial.println(gyro_x);
+  }
+}
+
+void getGyroY(){
+  Wire.beginTransmission(MPU_addr);
+  Wire.write(0x45);
+  Wire.endTransmission();
+
+  Wire.requestFrom(MPU_addr, 2);
+
+  while(Wire.available()){
+    int16_t gyro_y = Wire.read() << 8 | Wire.read();
+    Serial.print("gY = "); Serial.println(gyro_y);
+  }
+}
+
+void getGyroZ(){
+  Wire.beginTransmission(MPU_addr);
+  Wire.write(0x47);
+  Wire.endTransmission();
+
+  Wire.requestFrom(MPU_addr, 2);
+
+  while(Wire.available()){
+    int16_t gyro_z = Wire.read() << 8 | Wire.read();
+    Serial.print("gZ = "); Serial.println(gyro_z); 
+  }
+}
+
 void setup() {
   // инициализация
   Wire.begin();
@@ -22,73 +100,17 @@ void setup() {
   Serial.begin(9600);
 }
 void loop() {
-  Wire.beginTransmission(MPU_addr);
-  Wire.write(0x3b);
-  Wire.endTransmission();
-
-  Wire.requestFrom(MPU_addr, 2);
-
-  while(Wire.available()){
-    int16_t acc_x = Wire.read() << 8 | Wire.read();
-    Serial.print("aX = "); Serial.println(acc_x, DEC);
-  }
-
-  Wire.beginTransmission(MPU_addr);
-  Wire.write(0x3D);
-  Wire.endTransmission();
-
-  Wire.requestFrom(MPU_addr, 2);
-
-  while(Wire.available()){
-    int16_t acc_y = Wire.read() << 8 | Wire.read();
-    Serial.print("aY = "); Serial.println(acc_y, DEC);
-  }
-
-  Wire.beginTransmission(MPU_addr);
-  Wire.write(0x3F);
-  Wire.endTransmission();
-
-  Wire.requestFrom(MPU_addr, 2);
-
-  while(Wire.available()){
-    int16_t acc_z = Wire.read() << 8 | Wire.read();
-    Serial.print("aZ = "); Serial.println(acc_z, DEC);
-  }
+  //poll Accelerometr
+  getAccelX();
+  getAccelY();
+  getAccelZ();
 
   //poll Gyro 
+  getGyroX();
+  getGyroY();
+  getGyroZ();
+  
 
-  Wire.beginTransmission(MPU_addr);
-  Wire.write(0x43);
-  Wire.endTransmission();
-
-  Wire.requestFrom(MPU_addr, 2);
-
-  while(Wire.available()){
-    int16_t gyro_x = Wire.read() << 8 | Wire.read();
-    Serial.print("gX = "); Serial.println(gyro_x);
-  }
-
-  Wire.beginTransmission(MPU_addr);
-  Wire.write(0x45);
-  Wire.endTransmission();
-
-  Wire.requestFrom(MPU_addr, 2);
-
-  while(Wire.available()){
-    int16_t gyro_y = Wire.read() << 8 | Wire.read();
-    Serial.print("gY = "); Serial.println(gyro_y);
-  }
-
-  Wire.beginTransmission(MPU_addr);
-  Wire.write(0x47);
-  Wire.endTransmission();
-
-  Wire.requestFrom(MPU_addr, 2);
-
-  while(Wire.available()){
-    int16_t gyro_z = Wire.read() << 8 | Wire.read();
-    Serial.print("gZ = "); Serial.println(gyro_z); 
-  }
-
-  delay(500);
+  delay(100);
 }
+
