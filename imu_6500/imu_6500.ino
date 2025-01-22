@@ -11,6 +11,8 @@ int16_t gyro_X_data;
 int16_t gyro_Y_data;
 int16_t gyro_Z_data;
 
+volatile int z = 0;
+
 void getAccelX(){
   Wire.beginTransmission(MPU_addr);
   Wire.write(0x3b);
@@ -98,6 +100,9 @@ void setup() {
   Wire.endTransmission(true);
   
   Serial.begin(9600);
+  InitTimer();
+  interrupts();
+  pinMode(7, OUTPUT);
 }
 void loop() {
   //poll Accelerometr
@@ -112,5 +117,20 @@ void loop() {
   
 
   delay(100);
+}
+
+void InitTimer(){
+  TCCR1B = (1 << CS12) | (0 << CS11) | (1 << CS10); // 1024 prescaler
+  TCNT1 = 0;
+  TIMSK1 = (1 << TOIE1);
+}
+
+ISR(TIMER1_OVF_vect){
+  z++;
+  if(z == 10){
+    z = 0;
+    digitalWrite(7, digitalRead(7) ^ 1);
+
+  }
 }
 
