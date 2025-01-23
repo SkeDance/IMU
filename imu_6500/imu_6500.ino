@@ -1,7 +1,9 @@
 #include "Wire.h"
+#include <avr/io.h>
+#include <avr/interrupt.h>
 
 
-#define F_CPU 16000000UL
+#define F_CPU 16000000
 
 const int MPU_addr = 0x68; // адрес датчика
 // массив данных
@@ -98,22 +100,19 @@ void getGyroZ(){
 
 void setup() {
 
-  //noInterrupts();
-
+  InitTimer();
   InitMPU();
-  sei();
-  InitTimer(0.1);
 
   pinMode(7, OUTPUT);
 
-  Serial.begin(9600);
-
-  
+  Serial.begin(9600); 
 }
 void loop() {
   //float test = 0.1 / 0.000064;
   // Serial.println(OCR1);
-  if(flag == 3){
+
+  if(flag == 1){
+    
   //poll Accelerometr
   getAccelX();
   getAccelY();
@@ -126,22 +125,26 @@ void loop() {
 
   flag = 0;
   }
-  
 }
 
-void InitTimer(float time){
+void InitTimer(){
+  cli();
   TCCR1A = 0;
   TCCR1B = (1 << WGM12); // Compare mode
-  TCCR1B = (1 << CS12) | (0 << CS11) | (1 << CS10); // 1024 prescaler
-  OCR1A = Timer1ClockSetup(time);
+  TCCR1B = (1 << CS12);// | (1 << CS10); // 1024 prescaler
+  OCR1AH = 0b11101010; //0b00111101 - 15k; //0b11101010 - 60k
+  OCR1AL = 0b01100000; //0b00001000 - 15k; //0b01100000 - 60k
+  //OCR1A = 0x61B;//Timer1ClockSetup(time);
   TIMSK1 = (1 << OCIE1A); // enable compare interrupts
+  sei();
 }
 
 ISR(TIMER1_COMPA_vect){
   flag++;
-  if(flag == 3){
+  digitalWrite(7, digitalRead(7) ^ 1);
+  if(flag == 1){
     //led for interrupt test
-    digitalWrite(7, digitalRead(7) ^ 1);
+    //digitalWrite(7, digitalRead(7) ^ 1);
   }
 }
 
@@ -153,11 +156,11 @@ void InitMPU(){
   Wire.endTransmission(true);
 }
 
-float Timer1ClockSetup(float time){
-  float resolution = (1 / (F_CPU / 1024));
-  OCR1 = 1 / 15625;//(time / resolution); //(1 / (F_CPU / 1024));
-  Serial.println(OCR1);
-  return OCR1;
-  //set ocr1a to 15625
-}
+// float Timer1ClockSetup(float time){
+//   float resolution = (1 / (F_CPU / 1024));
+//   OCR1 = 1563;//(time / resolution); //(1 / (F_CPU / 1024));
+//   Serial.println(OCR1);
+//   return OCR1;
+//   //set ocr1a to 15625
+// }
 
