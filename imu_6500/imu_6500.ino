@@ -108,10 +108,8 @@ void setup() {
   Serial.begin(9600); 
 }
 void loop() {
-  //float test = 0.1 / 0.000064;
-  // Serial.println(OCR1);
-
-  if(flag == 6){
+  
+  if(flag == 1){
     
   //poll Accelerometr
   getAccelX();
@@ -129,10 +127,10 @@ void loop() {
 
 void InitTimer(){
   cli();
-  //TCCR1A = 0;
+  TCCR1A = 0;
   TCCR1B = (1 << WGM12); // Compare mode
   TCCR1B |= (1 << CS12) | (1 << CS10); // 1024 prescaler
-  OCR1A = 65000;
+  OCR1A = 15624;
   // OCR1AH = 0b11101010; //0b00111101 - 15k; //0b11101010 - 60k
   // OCR1AL = 0b01100000; //0b00001000 - 15k; //0b01100000 - 60k
   //OCR1A = 0x61B;//Timer1ClockSetup(time);
@@ -142,8 +140,7 @@ void InitTimer(){
 
 ISR(TIMER1_COMPA_vect){
   flag++;
-  //digitalWrite(7, digitalRead(7) ^ 1);
-  if(flag == 6){
+  if(flag == 1){
     //led for interrupt test
     digitalWrite(7, digitalRead(7) ^ 1);
   }
