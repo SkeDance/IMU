@@ -2,7 +2,6 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-
 #define F_CPU 16000000
 
 const int MPU_addr = 0x68; // адрес датчика
@@ -99,13 +98,13 @@ void getGyroZ(){
 }
 
 void setup() {
-
-  InitTimer();
+  Serial.begin(9600); 
+  
+  InitTimer(0.1);
   InitMPU();
 
   pinMode(7, OUTPUT);
 
-  Serial.begin(9600); 
 }
 void loop() {
   
@@ -125,15 +124,12 @@ void loop() {
   }
 }
 
-void InitTimer(){
+void InitTimer(float time){
   cli();
   TCCR1A = 0;
   TCCR1B = (1 << WGM12); // Compare mode
   TCCR1B |= (1 << CS12) | (1 << CS10); // 1024 prescaler
-  OCR1A = 15624;
-  // OCR1AH = 0b11101010; //0b00111101 - 15k; //0b11101010 - 60k
-  // OCR1AL = 0b01100000; //0b00001000 - 15k; //0b01100000 - 60k
-  //OCR1A = 0x61B;//Timer1ClockSetup(time);
+  OCR1A = Timer1ClockSetup(time);
   TIMSK1 |= (1 << OCIE1A); // enable compare interrupts
   sei();
 }
@@ -154,11 +150,10 @@ void InitMPU(){
   Wire.endTransmission(true);
 }
 
-// float Timer1ClockSetup(float time){
-//   float resolution = (1 / (F_CPU / 1024));
-//   OCR1 = 1563;//(time / resolution); //(1 / (F_CPU / 1024));
-//   Serial.println(OCR1);
-//   return OCR1;
-//   //set ocr1a to 15625
-// }
+float Timer1ClockSetup(float time){
+  float resolution = (1.0 / (F_CPU / 1024.0));
+  OCR1 = time / resolution;
+  Serial.println(OCR1);
+  return OCR1;
+}
 
