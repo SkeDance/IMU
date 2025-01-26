@@ -28,7 +28,8 @@ void getAccelX(){
 
   while(Wire.available()){
     int16_t acc_x = Wire.read() << 8 | Wire.read();
-    Serial.print("aX = "); Serial.println(acc_x, DEC);
+    float acc_X_real = (float)acc_x / 32768.0 * 2.0;
+    Serial.print("aX = "); Serial.println(acc_X_real, 6);
   }
 }
 
@@ -41,7 +42,8 @@ void getAccelY(){
 
   while(Wire.available()){
     int16_t acc_y = Wire.read() << 8 | Wire.read();
-    Serial.print("aY = "); Serial.println(acc_y, DEC);
+    float acc_Y_real = (float)acc_y / 32768.0 * 2.0;
+    Serial.print("aY = "); Serial.println(acc_Y_real, 6);
   }
 }
 
@@ -54,7 +56,8 @@ void getAccelZ(){
 
   while(Wire.available()){
     int16_t acc_z = Wire.read() << 8 | Wire.read();
-    Serial.print("aZ = "); Serial.println(acc_z, DEC);
+    float acc_Z_real = (float)acc_z / 32768.0 * 2.0;
+    Serial.print("aZ = "); Serial.println(acc_Z_real, 6);
   }
 }
 
@@ -67,7 +70,8 @@ void getGyroX(){
 
   while(Wire.available()){
     int16_t gyro_x = Wire.read() << 8 | Wire.read();
-    Serial.print("gX = "); Serial.println(gyro_x);
+    float gyro_X_real = (float)gyro_x / 32768.0 * 250.0;
+    Serial.print("gX = "); Serial.println(gyro_X_real, 6);
   }
 }
 
@@ -80,7 +84,8 @@ void getGyroY(){
 
   while(Wire.available()){
     int16_t gyro_y = Wire.read() << 8 | Wire.read();
-    Serial.print("gY = "); Serial.println(gyro_y);
+    float gyro_Y_real = (float)gyro_y / 32768.0 * 250.0;
+    Serial.print("gY = "); Serial.println(gyro_Y_real, 6);
   }
 }
 
@@ -93,7 +98,8 @@ void getGyroZ(){
 
   while(Wire.available()){
     int16_t gyro_z = Wire.read() << 8 | Wire.read();
-    Serial.print("gZ = "); Serial.println(gyro_z); 
+    float gyro_Z_real = (float)gyro_z / 32768.0 * 250.0;
+    Serial.print("gZ = "); Serial.println(gyro_Z_real, 6); 
   }
 }
 
