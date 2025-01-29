@@ -3,14 +3,17 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-#define F_CPU 16000000
-#define TEST_LED  7
+#define F_CPU           16000000
+#define TEST_LED        7
+#define ALIGNMENT_BTN   5 
 
 const int MPU_addr = 0x68; // адрес датчика
 // массив данных
 // [accX, accY, accZ, temp, gyrX, gyrY, gyrZ]
 // acc - ускорение, gyr - угловая скорость, temp - температура (raw)
 //int16_t data[7];  
+
+bool alignment_flag = 0;
 
 volatile int flag = 0;
 volatile float OCR1 = 0;
@@ -38,9 +41,9 @@ float wX;
 float wY;
 float wZ;
 
-float PITCH;
-float ROLL;
-float YAW;
+float PITCH_0;
+float ROLL_0;
+float YAW_0;
 
 float getAccelX(){
   Wire.beginTransmission(MPU_addr);
@@ -166,18 +169,18 @@ float getZ(){
 }
 
 float getPITCH(){
-  PITCH = -getAccelX() / g;
-  return PITCH;
+  PITCH_0 = -getAccelX() / g;
+  return PITCH_0;
 }
 
 float getROLL(){
-  ROLL = -getAccelY() / g;
-  return ROLL;
+  ROLL_0 = -getAccelY() / g;
+  return ROLL_0;
 }
 
 float getYAW(){
-  YAW = -atan(getGyroX() / getGyroY());
-  return YAW;
+  YAW_0 = -atan(getGyroX() / getGyroY());
+  return YAW_0;
 }
 
 void setup() {
@@ -187,27 +190,36 @@ void setup() {
   InitMPU();
 
   pinMode(TEST_LED, OUTPUT);
+  pinMode(ALIGNMENT_BTN, INPUT);
+  digitalWrite(ALIGNMENT_BTN, LOW);
 
-  YAW = getYAW();
 }
 
 void loop() {
-  
-  if(flag == 1){
 
-  //poll Accelerometr
-  X = getX();
-  Y = getY();
-  Z = getZ();
-  Serial.print("X = "); Serial.print(X); Serial.print("    Y = "); Serial.print(Y); Serial.print("    Z = "); Serial.println(Z);
- 
-  //poll Gyro 
-  wX = getGyroX();
-  wY = getGyroY();
-  wZ = getGyroZ(); 
-
-  flag = 0;
+  if(digitalRead(ALIGNMENT_BTN) == HIGH && alignment_flag == 0){
+    alignment_flag = true;
+    PITCH_0 = getPITCH();
+    ROLL_0 = getROLL();
+    YAW_0 = getYAW();
+    Serial.print("PITCH_0 = "); Serial.print(PITCH_0, 6); Serial.print("    ROLL_0 = "); Serial.print(ROLL_0, 6); Serial.print("    YAW_0 = "); Serial.println(YAW_0, 6);
   }
+
+  if(flag == 1 && alignment_flag == 1){
+
+    //poll Accelerometr
+    X = getX();
+    Y = getY();
+    Z = getZ();
+    Serial.print("X = "); Serial.print(X); Serial.print("    Y = "); Serial.print(Y); Serial.print("    Z = "); Serial.println(Z);
+  
+    //poll Gyro 
+    wX = getGyroX();
+    wY = getGyroY();
+    wZ = getGyroZ(); 
+
+    flag = 0;
+    }
 }
 
 void InitTimer(float time){
@@ -224,6 +236,9 @@ ISR(TIMER1_COMPA_vect){
   flag++;
   if(flag == 1){
     digitalWrite(TEST_LED, digitalRead(TEST_LED) ^ 1);
+  }
+  if(flag == 20){
+    flag = 0;
   }
 }
 
