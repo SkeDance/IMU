@@ -172,6 +172,24 @@ float getYAW(){
   return YAW_0;
 }
 
+void matrix(){
+  float C11 = cos(ROLL_0) * cos(YAW_0) + sin(PITCH_0) * sin(ROLL_0) * sin(YAW_0);
+  float C12 = -cos(ROLL_0) * sin(YAW_0) + sin(PITCH_0) * sin(ROLL_0) * cos(YAW_0);
+  float C13 = cos(PITCH_0) * sin(ROLL_0);
+  float C21 = cos(PITCH_0) * sin(YAW_0);
+  float C22 = cos(PITCH_0) * cos(YAW_0);
+  float C23 = sin(PITCH_0);
+  float C31 = sin(ROLL_0) * cos(YAW_0) - sin(PITCH_0) * cos(ROLL_0) * sin(YAW_0);
+  float C32 = -sin(ROLL_0) * sin(YAW_0) - sin(PITCH_0) * cos(ROLL_0) * sin(YAW_0);
+  float C33 = cos(PITCH_0) * cos(ROLL_0);
+  float matrix[3][3] = {C11, C12, C13, C21, C22, C23, C31, C32, C33};
+  // for(int i = 0; i < 3; i++){
+  //   for(int j = 0; j < 3; j++){
+  //     Serial.println(matrix[i][j], 6);
+  //   }
+  // }
+}
+
 void setup() {
   Serial.begin(9600); 
   
@@ -192,6 +210,7 @@ void loop() {
     ROLL_0 = getROLL();
     YAW_0 = getYAW();
     Serial.print("PITCH_0 = "); Serial.print(PITCH_0, 6); Serial.print("    ROLL_0 = "); Serial.print(ROLL_0, 6); Serial.print("    YAW_0 = "); Serial.println(YAW_0, 6);
+    matrix();
   }
 
   if(flag == 1 && alignment_flag == 1){
