@@ -13,11 +13,18 @@ const int MPU_addr = 0x68; // адрес датчика
 // acc - ускорение, gyr - угловая скорость, temp - температура (raw)
 //int16_t data[7];  
 
-bool alignment_flag = 0;
-
 volatile int flag = 0;
-volatile float OCR1 = 0;
+bool alignment_flag = 0;
+float OCR1 = 0;
 float g = 9.81;
+
+int16_t acc_x;
+int16_t acc_y;
+int16_t acc_z;
+
+int16_t gyro_x;
+int16_t gyro_y;
+int16_t gyro_z;
 
 float current_aX;
 float previous_aX;
@@ -52,13 +59,10 @@ float getAccelX(){
 
   Wire.requestFrom(MPU_addr, 2);
 
-  float acc_X_real;
-
   while(Wire.available()){
-    int16_t acc_x = Wire.read() << 8 | Wire.read();
-    acc_X_real = (float)acc_x / 32768.0 * 2.0;
+    acc_x = Wire.read() << 8 | Wire.read();
   }
-  return acc_X_real;
+  return (float)acc_x / 32768 * 2.0;
 }
 
 float getAccelY(){
@@ -68,13 +72,10 @@ float getAccelY(){
 
   Wire.requestFrom(MPU_addr, 2);
 
-  float acc_Y_real;
-
   while(Wire.available()){
-    int16_t acc_y = Wire.read() << 8 | Wire.read();
-    acc_Y_real = (float)acc_y / 32768.0 * 2.0;
+    acc_y = Wire.read() << 8 | Wire.read();
   }
-  return acc_Y_real;
+  return (float)acc_y / 32768.0 * 2.0;
 }
 
 float getAccelZ(){
@@ -84,13 +85,10 @@ float getAccelZ(){
 
   Wire.requestFrom(MPU_addr, 2);
 
-  float acc_Z_real;
-
   while(Wire.available()){
-    int16_t acc_z = Wire.read() << 8 | Wire.read();
-    acc_Z_real = (float)acc_z / 32768.0 * 2.0;
+    acc_z = Wire.read() << 8 | Wire.read();
   }
-  return acc_Z_real;
+  return (float)acc_z / 32768.0 * 2.0;
 }
 
 float getGyroX(){
@@ -100,13 +98,10 @@ float getGyroX(){
 
   Wire.requestFrom(MPU_addr, 2);
 
-  float gyro_X_real;
-
   while(Wire.available()){
-    int16_t gyro_x = Wire.read() << 8 | Wire.read();
-    gyro_X_real = (float)gyro_x / 32768.0 * 250.0;
+    gyro_x = Wire.read() << 8 | Wire.read();
   }
-  return gyro_X_real;
+  return (float)gyro_x / 32768.0 * 250.0;
 }
 
 float getGyroY(){
@@ -116,13 +111,10 @@ float getGyroY(){
 
   Wire.requestFrom(MPU_addr, 2);
 
-  float gyro_Y_real;
-
   while(Wire.available()){
-    int16_t gyro_y = Wire.read() << 8 | Wire.read();
-    gyro_Y_real = (float)gyro_y / 32768.0 * 250.0;
+    gyro_y = Wire.read() << 8 | Wire.read();
   }
-  return gyro_Y_real;
+  return (float)gyro_y / 32768.0 * 250.0;
 }
 
 float getGyroZ(){
@@ -132,13 +124,10 @@ float getGyroZ(){
 
   Wire.requestFrom(MPU_addr, 2);
 
-  float gyro_Z_real;
-
   while(Wire.available()){
-    int16_t gyro_z = Wire.read() << 8 | Wire.read();
-    gyro_Z_real = (float)gyro_z / 32768.0 * 250.0; 
+    gyro_z = Wire.read() << 8 | Wire.read();
   }
-  return gyro_Z_real;
+  return (float)gyro_z / 32768.0 * 250.0;
 }
 
 float getX(){
