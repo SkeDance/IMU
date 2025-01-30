@@ -52,6 +52,8 @@ float PITCH_0;
 float ROLL_0;
 float YAW_0;
 
+//float matrix_LL[3][3];
+
 float getAccelX(){
   Wire.beginTransmission(MPU_addr);
   Wire.write(0x3b);
@@ -172,7 +174,7 @@ float getYAW(){
   return YAW_0;
 }
 
-void matrix(){
+float matrix(int i, int j){
   float C11 = cos(ROLL_0) * cos(YAW_0) + sin(PITCH_0) * sin(ROLL_0) * sin(YAW_0);
   float C12 = -cos(ROLL_0) * sin(YAW_0) + sin(PITCH_0) * sin(ROLL_0) * cos(YAW_0);
   float C13 = cos(PITCH_0) * sin(ROLL_0);
@@ -182,12 +184,13 @@ void matrix(){
   float C31 = sin(ROLL_0) * cos(YAW_0) - sin(PITCH_0) * cos(ROLL_0) * sin(YAW_0);
   float C32 = -sin(ROLL_0) * sin(YAW_0) - sin(PITCH_0) * cos(ROLL_0) * sin(YAW_0);
   float C33 = cos(PITCH_0) * cos(ROLL_0);
-  float matrix[3][3] = {C11, C12, C13, C21, C22, C23, C31, C32, C33};
+  float matrix_LL[3][3] = {C11, C12, C13, C21, C22, C23, C31, C32, C33};
   // for(int i = 0; i < 3; i++){
   //   for(int j = 0; j < 3; j++){
-  //     Serial.println(matrix[i][j], 6);
+  //     Serial.println(matrix_LL[i][j], 6);
   //   }
   // }
+  return matrix_LL[i][j];
 }
 
 void setup() {
@@ -210,7 +213,16 @@ void loop() {
     ROLL_0 = getROLL();
     YAW_0 = getYAW();
     Serial.print("PITCH_0 = "); Serial.print(PITCH_0, 6); Serial.print("    ROLL_0 = "); Serial.print(ROLL_0, 6); Serial.print("    YAW_0 = "); Serial.println(YAW_0, 6);
-    matrix();
+
+    float Acc_matrix_BL[3][1] = {getAccelX(), getAccelX(), getAccelZ()};
+    float Acc_matrix_ENUp[3][1] = {0, 0, 0};
+    for(int i = 0, j = 0, k = 0; j <= 2; j++){
+      while(k <= 2){
+        Acc_matrix_ENUp[j][i] += ((matrix(j, k) * Acc_matrix_BL[k][i]));
+        k++;
+      }
+      k = 0;
+    }
   }
 
   if(flag == 1 && alignment_flag == 1){
@@ -219,6 +231,7 @@ void loop() {
     X = getX();
     Y = getY();
     Z = getZ();
+    
     Serial.print("X = "); Serial.print(X); Serial.print("    Y = "); Serial.print(Y); Serial.print("    Z = "); Serial.println(Z);
   
     //poll Gyro 
@@ -227,7 +240,7 @@ void loop() {
     wZ = getGyroZ(); 
 
     flag = 0;
-    }
+  }
 }
 
 void InitTimer(float time){
