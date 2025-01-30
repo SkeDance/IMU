@@ -18,6 +18,16 @@ bool alignment_flag = 0;
 float OCR1 = 0;
 float g = 9.81;
 
+float Acc_matrix_ENUp[3][1] = {0, 0, 0};
+
+//shirota & dolgota
+float latitude_0 = 55.44;
+float longitude_0 = 37.36 ;
+
+float R_Earth = 6.371 * (10 ^ 6);
+float R_latitude = (R_Earth * (1 - square(M_E))) / pow(1 - square(M_E) * square(sin(latitude_0)), 3 / 2);
+float R_longitude = (R_Earth * (1 - square(M_E))) / pow(1 - square(M_E) * square(sin(longitude_0)), 1 / 2);
+
 int16_t acc_x;
 int16_t acc_y;
 int16_t acc_z;
@@ -132,27 +142,29 @@ float getGyroZ(){
   return (float)gyro_z / 32768.0 * 250.0;
 }
 
-float getX(){
+float getX(float accel){
   previous_aX = current_aX;
-  current_aX = getAccelX();
+  current_aX = accel;
   prev_velocityX = velocityX;
   velocityX = velocityX + (current_aX + previous_aX) * 0.01;
-  X = X + (velocityX + prev_velocityX) * 0.01;
+  //checkout logic of math operations below - divide and integrate
+  X = latitude_0 + ((velocityX + prev_velocityX) * 0.01) / R_latitude;
   return X;
 }
 
-float getY(){
+float getY(float accel){
   previous_aY = current_aY;
-  current_aY = getAccelY();
+  current_aY = accel;
   prev_velocityY = velocityY;
   velocityY = velocityY + (current_aY + previous_aY) * 0.01;
-  Y = Y + (velocityY + prev_velocityY) * 0.01;
+  //checkout logic of math operations below - divide and integrate
+  Y = longitude_0 + ((velocityY + prev_velocityY) * 0.01) / R_longitude;
   return Y;
 }
 
-float getZ(){
+float getZ(float accel){
   previous_aZ = current_aZ;
-  current_aZ = getAccelZ();
+  current_aZ = accel;
   prev_velocityZ = velocityZ;
   velocityZ = velocityZ + (current_aZ + previous_aZ) * 0.01;
   Z = Z + (velocityZ + prev_velocityZ) * 0.01;
@@ -193,6 +205,17 @@ float matrix(int i, int j){
   return matrix_LL[i][j];
 }
 
+void bodyToLocal(){
+  float Acc_matrix_BL[3][1] = {getAccelX(), getAccelX(), getAccelZ()};
+  for(int i = 0, j = 0, k = 0; j <= 2; j++){
+    while(k <= 2){
+      Acc_matrix_ENUp[j][i] += ((matrix(j, k) * Acc_matrix_BL[k][i]));
+      k++;
+    }
+    k = 0;
+  }
+}
+
 void setup() {
   Serial.begin(9600); 
   
@@ -209,28 +232,33 @@ void loop() {
 
   if(digitalRead(ALIGNMENT_BTN) == HIGH && alignment_flag == 0){
     alignment_flag = true;
+
+    //try to combine into 1 func
     PITCH_0 = getPITCH();
     ROLL_0 = getROLL();
     YAW_0 = getYAW();
-    Serial.print("PITCH_0 = "); Serial.print(PITCH_0, 6); Serial.print("    ROLL_0 = "); Serial.print(ROLL_0, 6); Serial.print("    YAW_0 = "); Serial.println(YAW_0, 6);
 
-    float Acc_matrix_BL[3][1] = {getAccelX(), getAccelX(), getAccelZ()};
-    float Acc_matrix_ENUp[3][1] = {0, 0, 0};
-    for(int i = 0, j = 0, k = 0; j <= 2; j++){
-      while(k <= 2){
-        Acc_matrix_ENUp[j][i] += ((matrix(j, k) * Acc_matrix_BL[k][i]));
-        k++;
-      }
-      k = 0;
-    }
+    Serial.print("PITCH_0 = "); Serial.print(PITCH_0, 6); Serial.print("    ROLL_0 = "); Serial.print(ROLL_0, 6); Serial.print("    YAW_0 = "); Serial.println(YAW_0, 6);
   }
 
   if(flag == 1 && alignment_flag == 1){
 
     //poll Accelerometr
-    X = getX();
-    Y = getY();
-    Z = getZ();
+    //get coordinates
+    X = getX(Acc_matrix_ENUp[0][0]);
+    Y = getY(Acc_matrix_ENUp[1][0]);
+    Z = getZ(Acc_matrix_ENUp[2][0]);
+    
+    //update pitch, roll, yaw
+    //update from first integration of acceleration and other math operations with velocity
+    //better replace _0 variables with other variables, because _0 variables used for alignment
+    // PITCH_0 =
+    // ROLL_0 = 
+    // YAW_0 = 
+
+    //update matrix consisted of accelerations
+    //update only after new pitch, roll and yaw variables
+    bodyToLocal();
     
     Serial.print("X = "); Serial.print(X); Serial.print("    Y = "); Serial.print(Y); Serial.print("    Z = "); Serial.println(Z);
   
