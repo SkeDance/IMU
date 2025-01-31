@@ -70,8 +70,6 @@ float PITCH_E;
 float ROLL_E;
 float YAW_E;
 
-//float matrix_LL[3][3];
-
 float getAccelX(){
   Wire.beginTransmission(MPU_addr);
   Wire.write(0x3b);
@@ -194,8 +192,8 @@ float getYAW(float wX, float wY){
   return YAW_0;
 }
 
-void bodyToLocal(){
-  float Acc_matrix_BL[3][1] = {getAccelX(), getAccelX(), getAccelZ()};
+void bodyToLocal(float aX, float aY, float aZ){
+  float Acc_matrix_BL[3][1] = {aX, aY, aZ};
   for(int i = 0, j = 0, k = 0; j <= 2; j++){
     while(k <= 2){
       Acc_matrix_ENUp[j][i] += ((matrix(j, k) * Acc_matrix_BL[k][i]));
@@ -262,7 +260,7 @@ void loop() {
     ROLL_0 = getROLL(aY);
     YAW_0 = getYAW(wX, wY);
 
-    bodyToLocal();
+    bodyToLocal(aX, aY, aY);
 
     X = getX(Acc_matrix_ENUp[0][0]);
     Y = getY(Acc_matrix_ENUp[1][0]);
@@ -299,7 +297,7 @@ void loop() {
 
     //update matrix consisted of accelerations
     //update only after new pitch, roll and yaw variables
-    bodyToLocal();
+    bodyToLocal(aX, aY, aY);
 
     //poll Accelerometer
     //get coordinates
