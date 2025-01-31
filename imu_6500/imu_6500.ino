@@ -152,9 +152,10 @@ float getX(float accel){
   previous_aX = current_aX;
   current_aX = accel;
   prev_velocityX = velocityX;
-  velocityX = velocityX + (current_aX + previous_aX) * 0.01;
+  velocityX += (((current_aX + previous_aX) / 2 ) * 0.01);
   //checkout logic of math operations below - divide and integrate
-  X = latitude_0 + ((velocityX + prev_velocityX) * 0.01) / R_latitude;
+  X = latitude_0;
+  X += ((((velocityX + prev_velocityX)  / 2 ) * 0.01) / R_latitude);
   return X;
 }
 
@@ -162,9 +163,10 @@ float getY(float accel){
   previous_aY = current_aY;
   current_aY = accel;
   prev_velocityY = velocityY;
-  velocityY = velocityY + (current_aY + previous_aY) * 0.01;
+  velocityY += (((current_aY + previous_aY) / 2 ) * 0.01);
   //checkout logic of math operations below - divide and integrate
-  Y = longitude_0 + ((velocityY + prev_velocityY) * 0.01) / R_longitude;
+  Y = longitude_0;
+  Y += ((((velocityY + prev_velocityY) / 2 ) * 0.01) / R_longitude);
   return Y;
 }
 
@@ -172,8 +174,8 @@ float getZ(float accel){
   previous_aZ = current_aZ;
   current_aZ = accel;
   prev_velocityZ = velocityZ;
-  velocityZ = velocityZ + (current_aZ + previous_aZ) * 0.01;
-  Z = Z + (velocityZ + prev_velocityZ) * 0.01;
+  velocityZ +=(((current_aZ + previous_aZ) / 2 ) * 0.01);
+  Z = Z + ((velocityZ + prev_velocityZ) / 2) * 0.01;
   return Z;
 }
 
