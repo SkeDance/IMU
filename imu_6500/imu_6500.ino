@@ -20,7 +20,7 @@ float g = 9.81;
 
 float Acc_matrix_ENUp[3][1] = {0, 0, 0};
 
-//shirota & dolgota
+//shirota & dolgota / f % a
 float latitude_0 = 55.44;
 float longitude_0 = 37.36 ;
 
@@ -31,6 +31,10 @@ float R_longitude = (R_Earth * (1 - square(M_E))) / pow(1 - square(M_E) * square
 int16_t acc_x;
 int16_t acc_y;
 int16_t acc_z;
+
+float aX;
+float aY;
+float aZ; 
 
 int16_t gyro_x;
 int16_t gyro_y;
@@ -61,6 +65,10 @@ float wZ;
 float PITCH_0;
 float ROLL_0;
 float YAW_0;
+
+float PITCH_E;
+float ROLL_E;
+float YAW_E;
 
 //float matrix_LL[3][3];
 
@@ -171,20 +179,38 @@ float getZ(float accel){
   return Z;
 }
 
-float getPITCH(){
-  PITCH_0 = -getAccelX() / g;
+float getPITCH(float aX){
+  PITCH_0 = -aX / g;
   return PITCH_0;
 }
 
-float getROLL(){
-  ROLL_0 = -getAccelY() / g;
+float getROLL(float aY){
+  ROLL_0 = -aY / g;
   return ROLL_0;
 }
 
-float getYAW(){
-  YAW_0 = -atan(getGyroX() / getGyroY());
+float getYAW(float wX, float wY){
+  YAW_0 = -atan(wX / wY);
   return YAW_0;
 }
+
+void bodyToLocal(){
+  float Acc_matrix_BL[3][1] = {getAccelX(), getAccelX(), getAccelZ()};
+  for(int i = 0, j = 0, k = 0; j <= 2; j++){
+    while(k <= 2){
+      Acc_matrix_ENUp[j][i] += ((matrix(j, k) * Acc_matrix_BL[k][i]));
+      k++;
+    }
+    k = 0;
+  }
+}
+
+// float getVelocity(){
+  
+// }
+// getAngularVelcoityE(){
+//   float We = (-getAccelY()) / R_latitude);
+// }
 
 float matrix(int i, int j){
   float C11 = cos(ROLL_0) * cos(YAW_0) + sin(PITCH_0) * sin(ROLL_0) * sin(YAW_0);
@@ -205,17 +231,6 @@ float matrix(int i, int j){
   return matrix_LL[i][j];
 }
 
-void bodyToLocal(){
-  float Acc_matrix_BL[3][1] = {getAccelX(), getAccelX(), getAccelZ()};
-  for(int i = 0, j = 0, k = 0; j <= 2; j++){
-    while(k <= 2){
-      Acc_matrix_ENUp[j][i] += ((matrix(j, k) * Acc_matrix_BL[k][i]));
-      k++;
-    }
-    k = 0;
-  }
-}
-
 void setup() {
   Serial.begin(9600); 
   
@@ -232,41 +247,68 @@ void loop() {
 
   if(digitalRead(ALIGNMENT_BTN) == HIGH && alignment_flag == 0){
     alignment_flag = true;
+    //poll Accelerometer
+    aX = getAccelX();
+    aY = getAccelY();
+    aZ = getAccelZ();
 
-    //try to combine into 1 func
-    PITCH_0 = getPITCH();
-    ROLL_0 = getROLL();
-    YAW_0 = getYAW();
-
-    Serial.print("PITCH_0 = "); Serial.print(PITCH_0, 6); Serial.print("    ROLL_0 = "); Serial.print(ROLL_0, 6); Serial.print("    YAW_0 = "); Serial.println(YAW_0, 6);
-  }
-
-  if(flag == 1 && alignment_flag == 1){
-
-    //poll Accelerometr
-    //get coordinates
-    X = getX(Acc_matrix_ENUp[0][0]);
-    Y = getY(Acc_matrix_ENUp[1][0]);
-    Z = getZ(Acc_matrix_ENUp[2][0]);
-    
-    //update pitch, roll, yaw
-    //update from first integration of acceleration and other math operations with velocity
-    //better replace _0 variables with other variables, because _0 variables used for alignment
-    // PITCH_0 =
-    // ROLL_0 = 
-    // YAW_0 = 
-
-    //update matrix consisted of accelerations
-    //update only after new pitch, roll and yaw variables
-    bodyToLocal();
-    
-    Serial.print("X = "); Serial.print(X); Serial.print("    Y = "); Serial.print(Y); Serial.print("    Z = "); Serial.println(Z);
-  
     //poll Gyro 
     wX = getGyroX();
     wY = getGyroY();
     wZ = getGyroZ(); 
 
+    //try to combine into 1 func
+    PITCH_0 = getPITCH(aX);
+    ROLL_0 = getROLL(aY);
+    YAW_0 = getYAW(wX, wY);
+
+    bodyToLocal();
+
+    X = getX(Acc_matrix_ENUp[0][0]);
+    Y = getY(Acc_matrix_ENUp[1][0]);
+    Z = getZ(Acc_matrix_ENUp[2][0]);
+
+    Serial.print("PITCH_0 = "); Serial.print(PITCH_0, 6); Serial.print("    ROLL_0 = "); Serial.print(ROLL_0, 6); Serial.print("    YAW_0 = "); Serial.println(YAW_0, 6);
+
+    Serial.print("aX = "); Serial.print(Acc_matrix_ENUp[0][0]); Serial.print("    aY = "); Serial.print(Acc_matrix_ENUp[1][0]); Serial.print("    aZ = "); Serial.println(Acc_matrix_ENUp[2][0]);
+
+    Serial.print("X1 = "); Serial.print(X); Serial.print("    Y1 = "); Serial.print(Y); Serial.print("    Z1 = "); Serial.println(Z);
+  }
+  
+  if(flag == 1 && alignment_flag == 1){
+
+    //poll Accelerometer
+    aX = getAccelX();
+    aY = getAccelY();
+    aZ = getAccelZ();
+    
+    //poll Gyro 
+    wX = getGyroX();
+    wY = getGyroY();
+    wZ = getGyroZ(); 
+
+    //update pitch, roll, yaw
+    //update from first integration of acceleration and other math operations with velocity
+    //better replace _0 variables with other variables, because _0 variables used for alignment
+    PITCH_0 = getPITCH(aX);
+    ROLL_0 = getROLL(aY);
+    YAW_0 = getYAW(wX, wY); 
+    //PITCH_E = ;
+    //ROLL_E = ;
+    //YAW_E = ;
+
+    //update matrix consisted of accelerations
+    //update only after new pitch, roll and yaw variables
+    bodyToLocal();
+
+    //poll Accelerometer
+    //get coordinates
+    X = getX(Acc_matrix_ENUp[0][0]);
+    Y = getY(Acc_matrix_ENUp[1][0]);
+    Z = getZ(Acc_matrix_ENUp[2][0]);   
+    
+    Serial.print("X = "); Serial.print(X); Serial.print("    Y = "); Serial.print(Y); Serial.print("    Z = "); Serial.println(Z);
+  
     flag = 0;
   }
 }
