@@ -62,13 +62,13 @@ float wX;
 float wY;
 float wZ;
 
+float wE;
+float wN;
+float wUp;
+
 float PITCH_0;
 float ROLL_0;
 float YAW_0;
-
-float PITCH_E;
-float ROLL_E;
-float YAW_E;
 
 float getAccelX(){
   Wire.beginTransmission(MPU_addr);
@@ -203,13 +203,6 @@ void bodyToLocal(float aX, float aY, float aZ){
   }
 }
 
-// float getVelocity(){
-  
-// }
-// getAngularVelcoityE(){
-//   float We = (-getAccelY()) / R_latitude);
-// }
-
 float matrix(int i, int j){
   float C11 = cos(ROLL_0) * cos(YAW_0) + sin(PITCH_0) * sin(ROLL_0) * sin(YAW_0);
   float C12 = -cos(ROLL_0) * sin(YAW_0) + sin(PITCH_0) * sin(ROLL_0) * cos(YAW_0);
@@ -245,6 +238,7 @@ void loop() {
 
   if(digitalRead(ALIGNMENT_BTN) == HIGH && alignment_flag == 0){
     alignment_flag = true;
+
     //poll Accelerometer
     aX = getAccelX();
     aY = getAccelY();
@@ -265,6 +259,11 @@ void loop() {
     X = getX(Acc_matrix_ENUp[0][0]);
     Y = getY(Acc_matrix_ENUp[1][0]);
     Z = getZ(Acc_matrix_ENUp[2][0]);
+
+    //calculate angular velocity
+    wE = -velocityY / R_latitude;
+    wN = velocityX / R_longitude;
+    wUp = velocityX / R_longitude * tan(latitude_0);
 
     Serial.print("PITCH_0 = "); Serial.print(PITCH_0, 6); Serial.print("    ROLL_0 = "); Serial.print(ROLL_0, 6); Serial.print("    YAW_0 = "); Serial.println(YAW_0, 6);
 
@@ -304,6 +303,10 @@ void loop() {
     X = getX(Acc_matrix_ENUp[0][0]);
     Y = getY(Acc_matrix_ENUp[1][0]);
     Z = getZ(Acc_matrix_ENUp[2][0]);   
+
+    wE = -velocityY / R_latitude;
+    wN = velocityX / R_longitude;
+    wUp = velocityX / R_longitude * tan(X);
     
     Serial.print("X = "); Serial.print(X); Serial.print("    Y = "); Serial.print(Y); Serial.print("    Z = "); Serial.println(Z);
   
