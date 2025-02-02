@@ -18,7 +18,14 @@ bool alignment_flag = 0;
 float OCR1 = 0;
 float g = 9.81;
 
-float Acc_matrix_ENUp[3][1] = {0, 0, 0};
+float Acc_matrix_BL[3][1]; //матрица с показаниями акселерометров
+float Acc_matrix_ENUp[3][1] = {0, 0, 0}; //матрица ускорений в системе ENUp
+
+float matrix_LL[3][3]; //матрица для выставки на перовм такте 
+float matrix_W_LL[3][3]; //матрица посчитанных угловых скоростей из показаний акслерометра 
+float matrix_W_B[3][3]; //матрица показаний ДУСа
+
+float NEW_LL_MATRIX[3][3]; // новая матрица, которая используется для перевода в систему ENUp на последующих тактах работы алгоритма
 
 //shirota & dolgota / f % a
 float latitude_0 = 55.44;
@@ -195,7 +202,9 @@ float getYAW(float wX, float wY){
 }
 
 void bodyToLocal(float aX, float aY, float aZ){
-  float Acc_matrix_BL[3][1] = {aX, aY, aZ};
+  Acc_matrix_BL[0][0] = aX;
+  Acc_matrix_BL[1][0] = aY;
+  Acc_matrix_BL[2][0] = aZ;
   for(int i = 0, j = 0, k = 0; j <= 2; j++){
     while(k <= 2){
       Acc_matrix_ENUp[j][i] += ((matrix(j, k) * Acc_matrix_BL[k][i]));
@@ -206,22 +215,59 @@ void bodyToLocal(float aX, float aY, float aZ){
 }
 
 float matrix(int i, int j){
-  float C11 = cos(ROLL_0) * cos(YAW_0) + sin(PITCH_0) * sin(ROLL_0) * sin(YAW_0);
-  float C12 = -cos(ROLL_0) * sin(YAW_0) + sin(PITCH_0) * sin(ROLL_0) * cos(YAW_0);
-  float C13 = cos(PITCH_0) * sin(ROLL_0);
-  float C21 = cos(PITCH_0) * sin(YAW_0);
-  float C22 = cos(PITCH_0) * cos(YAW_0);
-  float C23 = sin(PITCH_0);
-  float C31 = sin(ROLL_0) * cos(YAW_0) - sin(PITCH_0) * cos(ROLL_0) * sin(YAW_0);
-  float C32 = -sin(ROLL_0) * sin(YAW_0) - sin(PITCH_0) * cos(ROLL_0) * sin(YAW_0);
-  float C33 = cos(PITCH_0) * cos(ROLL_0);
-  float matrix_LL[3][3] = {C11, C12, C13, C21, C22, C23, C31, C32, C33};
+  matrix_LL[0][0] = cos(ROLL_0) * cos(YAW_0) + sin(PITCH_0) * sin(ROLL_0) * sin(YAW_0);
+  matrix_LL[0][1] = -cos(ROLL_0) * sin(YAW_0) + sin(PITCH_0) * sin(ROLL_0) * cos(YAW_0);
+  matrix_LL[0][2] = cos(PITCH_0) * sin(ROLL_0);
+  matrix_LL[1][0] = cos(PITCH_0) * sin(YAW_0);
+  matrix_LL[1][1] = cos(PITCH_0) * cos(YAW_0);
+  matrix_LL[1][2] = sin(PITCH_0);
+  matrix_LL[2][0] = sin(ROLL_0) * cos(YAW_0) - sin(PITCH_0) * cos(ROLL_0) * sin(YAW_0);
+  matrix_LL[2][1] = -sin(ROLL_0) * sin(YAW_0) - sin(PITCH_0) * cos(ROLL_0) * sin(YAW_0);
+  matrix_LL[2][2] = cos(PITCH_0) * cos(ROLL_0);
   // for(int i = 0; i < 3; i++){
   //   for(int j = 0; j < 3; j++){
   //     Serial.println(matrix_LL[i][j], 6);
   //   }
   // }
   return matrix_LL[i][j];
+}
+
+float matrix_W_ENUp(int i, int j){
+  matrix_W_LL[0][0] = 0;
+  matrix_W_LL[0][1] = -wUp;
+  matrix_W_LL[0][2] = wN;
+  matrix_W_LL[1][0] = wUp;
+  matrix_W_LL[1][1] = 0;
+  matrix_W_LL[1][2] = -wE;
+  matrix_W_LL[2][0] = -wN;
+  matrix_W_LL[2][1] = wE;
+  matrix_W_LL[2][2] = 0;
+  return matrix_W_LL[i][j];
+}
+
+float matrix_W_DUS(int i, int j){
+  matrix_W_B[0][0] = 0;
+  matrix_W_B[0][1] = -wZ;
+  matrix_W_B[0][2] = wY;
+  matrix_W_B[1][0] = wZ;
+  matrix_W_B[1][1] = 0;
+  matrix_W_B[1][2] = -wX;
+  matrix_W_B[2][0] = -wY;
+  matrix_W_B[2][1] = wX;
+  matrix_W_B[2][2] = 0;
+  return matrix_W_B[i][j];
+}
+
+void Puasson(float aX, float aY, float aZ){
+  for(int i = 0, j = 0, k = 0; j <= 2; j++){
+    while(k <= 2){
+      NEW_LL_MATRIX[j][i] += ((matrix(j, k) * matrix_W_DUS(k, j)));
+      k++;
+    }
+    //Find way to increment i after k = 0
+    k = 0;
+    i++;
+  }
 }
 
 void setup() {
