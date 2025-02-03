@@ -215,15 +215,15 @@ void bodyToLocal(float aX, float aY, float aZ){
 }
 
 float matrix(int i, int j){
-  matrix_LL[0][0] = cos(ROLL_0) * cos(YAW_0) + sin(PITCH_0) * sin(ROLL_0) * sin(YAW_0);
-  matrix_LL[0][1] = -cos(ROLL_0) * sin(YAW_0) + sin(PITCH_0) * sin(ROLL_0) * cos(YAW_0);
-  matrix_LL[0][2] = cos(PITCH_0) * sin(ROLL_0);
-  matrix_LL[1][0] = cos(PITCH_0) * sin(YAW_0);
-  matrix_LL[1][1] = cos(PITCH_0) * cos(YAW_0);
-  matrix_LL[1][2] = sin(PITCH_0);
-  matrix_LL[2][0] = sin(ROLL_0) * cos(YAW_0) - sin(PITCH_0) * cos(ROLL_0) * sin(YAW_0);
-  matrix_LL[2][1] = -sin(ROLL_0) * sin(YAW_0) - sin(PITCH_0) * cos(ROLL_0) * sin(YAW_0);
-  matrix_LL[2][2] = cos(PITCH_0) * cos(ROLL_0);
+  matrix_LL[0][0] = 1;//cos(ROLL_0) * cos(YAW_0) + sin(PITCH_0) * sin(ROLL_0) * sin(YAW_0);
+  matrix_LL[0][1] = 2;//-cos(ROLL_0) * sin(YAW_0) + sin(PITCH_0) * sin(ROLL_0) * cos(YAW_0);
+  matrix_LL[0][2] = 3;//cos(PITCH_0) * sin(ROLL_0);
+  matrix_LL[1][0] = 4;//cos(PITCH_0) * sin(YAW_0);
+  matrix_LL[1][1] = 5;//cos(PITCH_0) * cos(YAW_0);
+  matrix_LL[1][2] = 6;//sin(PITCH_0);
+  matrix_LL[2][0] = 7;//sin(ROLL_0) * cos(YAW_0) - sin(PITCH_0) * cos(ROLL_0) * sin(YAW_0);
+  matrix_LL[2][1] = 8;//-sin(ROLL_0) * sin(YAW_0) - sin(PITCH_0) * cos(ROLL_0) * sin(YAW_0);
+  matrix_LL[2][2] = 9;//cos(PITCH_0) * cos(ROLL_0);
   // for(int i = 0; i < 3; i++){
   //   for(int j = 0; j < 3; j++){
   //     Serial.println(matrix_LL[i][j], 6);
@@ -233,40 +233,40 @@ float matrix(int i, int j){
 }
 
 float matrix_W_ENUp(int i, int j){
-  matrix_W_LL[0][0] = 0;
-  matrix_W_LL[0][1] = -wUp;
-  matrix_W_LL[0][2] = wN;
-  matrix_W_LL[1][0] = wUp;
-  matrix_W_LL[1][1] = 0;
-  matrix_W_LL[1][2] = -wE;
-  matrix_W_LL[2][0] = -wN;
-  matrix_W_LL[2][1] = wE;
-  matrix_W_LL[2][2] = 0;
+  matrix_W_LL[0][0] = 10;//0;
+  matrix_W_LL[0][1] = 20;//-wUp;
+  matrix_W_LL[0][2] = 30;//wN;
+  matrix_W_LL[1][0] = 40;//wUp;
+  matrix_W_LL[1][1] = 50;//0;
+  matrix_W_LL[1][2] = 60;//-wE;
+  matrix_W_LL[2][0] = 70;//-wN;
+  matrix_W_LL[2][1] = 80;//wE;
+  matrix_W_LL[2][2] = 90;//0;
   return matrix_W_LL[i][j];
 }
 
 float matrix_W_DUS(int i, int j){
-  matrix_W_B[0][0] = 0;
-  matrix_W_B[0][1] = -wZ;
-  matrix_W_B[0][2] = wY;
-  matrix_W_B[1][0] = wZ;
-  matrix_W_B[1][1] = 0;
-  matrix_W_B[1][2] = -wX;
-  matrix_W_B[2][0] = -wY;
-  matrix_W_B[2][1] = wX;
-  matrix_W_B[2][2] = 0;
+  matrix_W_B[0][0] = 11;//0;
+  matrix_W_B[0][1] = 21;//-wZ;
+  matrix_W_B[0][2] = 31;//wY;
+  matrix_W_B[1][0] = 41;//wZ;
+  matrix_W_B[1][1] = 51;//0;
+  matrix_W_B[1][2] = 61;//-wX;
+  matrix_W_B[2][0] = 71;//-wY;
+  matrix_W_B[2][1] = 81;//wX;
+  matrix_W_B[2][2] = 91;//0;
   return matrix_W_B[i][j];
 }
 
-void Puasson(float aX, float aY, float aZ){
-  for(int i = 0, j = 0, k = 0; j <= 2; j++){
-    while(k <= 2){
-      NEW_LL_MATRIX[j][i] += ((matrix(j, k) * matrix_W_DUS(k, j)));
-      k++;
+void Puasson(){
+  for(int i = 0, j = 0, k = 0; i <= 2; i++){
+    for(; j <= 2; j++){
+      for(; k <= 2; k++){
+        NEW_LL_MATRIX[i][j] += ((matrix(i, k) * matrix_W_DUS(k, j)) - matrix(i, k) * matrix_W_ENUp(k ,j));
+      }
+      k = 0;
     }
-    //Find way to increment i after k = 0
-    k = 0;
-    i++;
+    j = 0;
   }
 }
 
@@ -318,7 +318,18 @@ void loop() {
     Serial.print("aX = "); Serial.print(Acc_matrix_ENUp[0][0]); Serial.print("    aY = "); Serial.print(Acc_matrix_ENUp[1][0]); Serial.print("    aZ = "); Serial.println(Acc_matrix_ENUp[2][0]);
 
     Serial.print("X1 = "); Serial.print(X); Serial.print("    Y1 = "); Serial.print(Y); Serial.print("    Z1 = "); Serial.println(Z);
+
+
+    Puasson();
+
+    for(int i = 0; i < 3; i++){
+      for(int j = 0; j < 3; j++){
+        Serial.println(NEW_LL_MATRIX[i][j], 6);
+      }
+    }
+
   }
+
   
   if(flag == 1 && alignment_flag == 1){
 
