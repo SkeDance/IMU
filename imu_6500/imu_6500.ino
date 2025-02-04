@@ -298,6 +298,7 @@ void loop() {
     wY = getGyroY();
     wZ = getGyroZ(); 
 
+    //get first angles
     //try to combine into 1 func
     PITCH_0 = getPITCH(aX);
     ROLL_0 = getROLL(aY);
@@ -305,6 +306,7 @@ void loop() {
 
     bodyToLocal(aX, aY, aY);
 
+    //get coordinates
     X = getX(Acc_matrix_ENUp[0][0]);
     Y = getY(Acc_matrix_ENUp[1][0]);
     Z = getZ(Acc_matrix_ENUp[2][0]);
@@ -314,13 +316,16 @@ void loop() {
     wN = velocityX / R_longitude;
     wUp = velocityX / R_longitude * tan(latitude_0);
 
+    //resolve Poisson equation
     Poisson();
-
+    
+    //coefficient for PITCH calculation
     C_0 = sqrt(((NEW_LL_MATRIX[2][0] * NEW_LL_MATRIX[2][0]) + (NEW_LL_MATRIX[2][2] * NEW_LL_MATRIX[2][2])));
 
-    PITCH = fmod((NEW_LL_MATRIX[2][1] / C_0), 90.0);
-    ROLL = fmod((NEW_LL_MATRIX[2][0] / NEW_LL_MATRIX[2][2]), 180.0);
-    YAW = fmod((NEW_LL_MATRIX[0][1] / NEW_LL_MATRIX[1][1]), 360.0);
+    //get angles
+    PITCH = (NEW_LL_MATRIX[2][1] / C_0);//fmod((NEW_LL_MATRIX[2][1] / C_0), 90.0);
+    ROLL = (NEW_LL_MATRIX[2][0] / NEW_LL_MATRIX[2][2]);//fmod((NEW_LL_MATRIX[2][0] / NEW_LL_MATRIX[2][2]), 180.0);
+    YAW = (NEW_LL_MATRIX[0][1] / NEW_LL_MATRIX[1][1]);//fmod((NEW_LL_MATRIX[0][1] / NEW_LL_MATRIX[1][1]), 360.0);
 
     Serial.print("PITCH_0 = "); Serial.print(PITCH_0, 6); Serial.print("    ROLL_0 = "); Serial.print(ROLL_0, 6); Serial.print("    YAW_0 = "); Serial.println(YAW_0, 6);
 
@@ -356,12 +361,9 @@ void loop() {
     //update pitch, roll, yaw
     //update from first integration of acceleration and other math operations with velocity
     //better replace _0 variables with other variables, because _0 variables used for alignment
-    PITCH_0 = getPITCH(aX);
-    ROLL_0 = getROLL(aY);
-    YAW_0 = getYAW(wX, wY); 
-    //PITCH_E = ;
-    //ROLL_E = ;
-    //YAW_E = ;
+    PITCH_0 = PITCH;
+    ROLL_0 = ROLL;
+    YAW_0 = YAW; 
 
     //update matrix consisted of accelerations
     //update only after new pitch, roll and yaw variables
@@ -373,11 +375,24 @@ void loop() {
     Y = getY(Acc_matrix_ENUp[1][0]);
     Z = getZ(Acc_matrix_ENUp[2][0]);   
 
+    //calculate angular velocity
     wE = -velocityY / R_latitude;
     wN = velocityX / R_longitude;
     wUp = velocityX / R_longitude * tan(X);
+
+    //resolve Poisson equation
+    Poisson();
+
+    //coefficinet for PITCH calculation
+    C_0 = sqrt(((NEW_LL_MATRIX[2][0] * NEW_LL_MATRIX[2][0]) + (NEW_LL_MATRIX[2][2] * NEW_LL_MATRIX[2][2])));
+
+    //get angles
+    PITCH = (NEW_LL_MATRIX[2][1] / C_0);//fmod((NEW_LL_MATRIX[2][1] / C_0), 90.0);
+    ROLL = (NEW_LL_MATRIX[2][0] / NEW_LL_MATRIX[2][2]);//fmod((NEW_LL_MATRIX[2][0] / NEW_LL_MATRIX[2][2]), 180.0);
+    YAW = (NEW_LL_MATRIX[0][1] / NEW_LL_MATRIX[1][1]);//fmod((NEW_LL_MATRIX[0][1] / NEW_LL_MATRIX[1][1]), 360.0);
     
-    Serial.print("X = "); Serial.print(X); Serial.print("    Y = "); Serial.print(Y); Serial.print("    Z = "); Serial.println(Z);
+    Serial.print("X = "); Serial.print(X); Serial.print("    Y = "); Serial.print(Y); Serial.print("    Z = "); Serial.print(Z); 
+    Serial.print("    PITCH = "); Serial.print(PITCH, 6); Serial.print("    ROLL = "); Serial.print(ROLL, 6); Serial.print("    YAW = "); Serial.println(YAW, 6);
   
     flag = 0;
   }
