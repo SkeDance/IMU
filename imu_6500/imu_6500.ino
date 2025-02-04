@@ -323,11 +323,11 @@ void loop() {
     C_0 = sqrt(((NEW_LL_MATRIX[2][0] * NEW_LL_MATRIX[2][0]) + (NEW_LL_MATRIX[2][2] * NEW_LL_MATRIX[2][2])));
 
     //get angles
-    PITCH = (NEW_LL_MATRIX[2][1] / C_0);//fmod((NEW_LL_MATRIX[2][1] / C_0), 90.0);
-    ROLL = (NEW_LL_MATRIX[2][0] / NEW_LL_MATRIX[2][2]);//fmod((NEW_LL_MATRIX[2][0] / NEW_LL_MATRIX[2][2]), 180.0);
-    YAW = (NEW_LL_MATRIX[0][1] / NEW_LL_MATRIX[1][1]);//fmod((NEW_LL_MATRIX[0][1] / NEW_LL_MATRIX[1][1]), 360.0);
+    PITCH = atan(fmod((NEW_LL_MATRIX[2][1] / C_0), 90.0));//(NEW_LL_MATRIX[2][1] / C_0);
+    ROLL = atan(fmod((NEW_LL_MATRIX[2][0] / NEW_LL_MATRIX[2][2]), 180.0));//(NEW_LL_MATRIX[2][0] / NEW_LL_MATRIX[2][2]);
+    YAW = atan(fmod((NEW_LL_MATRIX[0][1] / NEW_LL_MATRIX[1][1]), 360.0));//(NEW_LL_MATRIX[0][1] / NEW_LL_MATRIX[1][1]);
 
-    Serial.print("PITCH_0 = "); Serial.print(PITCH_0, 6); Serial.print("    ROLL_0 = "); Serial.print(ROLL_0, 6); Serial.print("    YAW_0 = "); Serial.println(YAW_0, 6);
+    Serial.print("PITCH_0 = "); Serial.print(PITCH_0 * 180.0 / M_PI, 6); Serial.print("    ROLL_0 = "); Serial.print(ROLL_0 * 180.0 / M_PI, 6); Serial.print("    YAW_0 = "); Serial.println(YAW_0 * 180.0 / M_PI, 6);
 
     Serial.print("aX = "); Serial.print(Acc_matrix_ENUp[0][0]); Serial.print("    aY = "); Serial.print(Acc_matrix_ENUp[1][0]); Serial.print("    aZ = "); Serial.println(Acc_matrix_ENUp[2][0]);
 
@@ -341,7 +341,7 @@ void loop() {
 
     Serial.print("C_0 = "); Serial.println(C_0, 6);
 
-    Serial.print("PITCH = "); Serial.print(PITCH, 6); Serial.print("    ROLL = "); Serial.print(ROLL, 6); Serial.print("    YAW = "); Serial.println(YAW, 6);
+    Serial.print("PITCH = "); Serial.print(PITCH * 180.0 / M_PI, 6); Serial.print("    ROLL = "); Serial.print(ROLL * 180.0 / M_PI, 6); Serial.print("    YAW = "); Serial.println(YAW * 180.0 / M_PI, 6);
 
   }
 
@@ -387,13 +387,17 @@ void loop() {
     C_0 = sqrt(((NEW_LL_MATRIX[2][0] * NEW_LL_MATRIX[2][0]) + (NEW_LL_MATRIX[2][2] * NEW_LL_MATRIX[2][2])));
 
     //get angles
-    PITCH = (NEW_LL_MATRIX[2][1] / C_0);//fmod((NEW_LL_MATRIX[2][1] / C_0), 90.0);
-    ROLL = (NEW_LL_MATRIX[2][0] / NEW_LL_MATRIX[2][2]);//fmod((NEW_LL_MATRIX[2][0] / NEW_LL_MATRIX[2][2]), 180.0);
-    YAW = (NEW_LL_MATRIX[0][1] / NEW_LL_MATRIX[1][1]);//fmod((NEW_LL_MATRIX[0][1] / NEW_LL_MATRIX[1][1]), 360.0);
+    // PITCH = atan((NEW_LL_MATRIX[2][1] / C_0));//fmod((NEW_LL_MATRIX[2][1] / C_0), 90.0)
+    // ROLL = atan((NEW_LL_MATRIX[2][0] / NEW_LL_MATRIX[2][2]));//fmod((NEW_LL_MATRIX[2][0] / NEW_LL_MATRIX[2][2]), 180.0)
+    // YAW = atan((NEW_LL_MATRIX[0][1] / NEW_LL_MATRIX[1][1]));//fmod((NEW_LL_MATRIX[0][1] / NEW_LL_MATRIX[1][1]), 360.0)
+
+    PITCH = atan(fmod((NEW_LL_MATRIX[2][1] / C_0), 90.0));//(NEW_LL_MATRIX[2][1] / C_0);
+    ROLL = atan(fmod((NEW_LL_MATRIX[2][0] / NEW_LL_MATRIX[2][2]), 180.0));//(NEW_LL_MATRIX[2][0] / NEW_LL_MATRIX[2][2]);
+    YAW = atan(fmod((NEW_LL_MATRIX[0][1] / NEW_LL_MATRIX[1][1]), 360.0));//(NEW_LL_MATRIX[0][1] / NEW_LL_MATRIX[1][1]);
     
     Serial.print("X = "); Serial.print(X); Serial.print("    Y = "); Serial.print(Y); Serial.print("    Z = "); Serial.print(Z); 
-    Serial.print("    PITCH = "); Serial.print(PITCH, 6); Serial.print("    ROLL = "); Serial.print(ROLL, 6); Serial.print("    YAW = "); Serial.println(YAW, 6);
-  
+    Serial.print("    PITCH = "); Serial.print(PITCH * 180.0 / M_PI, 6); Serial.print("    ROLL = "); Serial.print(ROLL * 180.0 / M_PI, 6); Serial.print("    YAW = "); Serial.println(YAW * 180.0 / M_PI, 6);
+ 
     flag = 0;
   }
 }
