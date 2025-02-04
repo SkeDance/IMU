@@ -369,7 +369,6 @@ void loop() {
     //update only after new pitch, roll and yaw variables
     bodyToLocal(aX, aY, aY);
 
-    //poll Accelerometer
     //get coordinates
     X = getX(Acc_matrix_ENUp[0][0]);
     Y = getY(Acc_matrix_ENUp[1][0]);
