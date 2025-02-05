@@ -9,7 +9,7 @@
 #define ALIGNMENT_BTN   5 
 
 #define AK8963_ADDRESS  0x0C
-#define MPU_addr        0x68
+#define MPU_addr        0x4A//0x68
 //const int MPU_addr = 0x68; // адрес датчика
 // массив данных
 // [accX, accY, accZ, temp, gyrX, gyrY, gyrZ]
@@ -278,11 +278,11 @@ void Poisson(){
 
 float getMagnX(){
   digitalWrite(TEST_LED_MAGN, digitalRead(TEST_LED_MAGN) ^1);
-  Wire.beginTransmission(AK8963_ADDRESS);
-  Wire.write(0x03);
+  Wire.beginTransmission(MPU_addr);
+  Wire.write(0x16);
   Wire.endTransmission();
 
-  Wire.requestFrom(AK8963_ADDRESS, 2);
+  Wire.requestFrom(MPU_addr, 2);
 
   while(Wire.available()){
     magn_x = Wire.read() << 8 | Wire.read();
