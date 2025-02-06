@@ -9,7 +9,7 @@
 #define ALIGNMENT_BTN   5 
 
 #define AK8963_ADDRESS  0x0C
-#define MPU_addr        0x4A//0x68
+#define MPU_addr        0x68
 //const int MPU_addr = 0x68; // адрес датчика
 // массив данных
 // [accX, accY, accZ, temp, gyrX, gyrY, gyrZ]
@@ -276,19 +276,19 @@ void Poisson(){
   }
 }
 
-float getMagnX(){
-  digitalWrite(TEST_LED_MAGN, digitalRead(TEST_LED_MAGN) ^1);
-  Wire.beginTransmission(MPU_addr);
-  Wire.write(0x16);
-  Wire.endTransmission();
+// float getMagnX(){
+//   digitalWrite(TEST_LED_MAGN, digitalRead(TEST_LED_MAGN) ^1);
+//   Wire.beginTransmission(MPU_addr);
+//   Wire.write(0x16);
+//   Wire.endTransmission();
 
-  Wire.requestFrom(MPU_addr, 2);
+//   Wire.requestFrom(MPU_addr, 2);
 
-  while(Wire.available()){
-    magn_x = Wire.read() << 8 | Wire.read();
-  }
-  return magn_x;
-}
+//   while(Wire.available()){
+//     magn_x = Wire.read() << 8 | Wire.read();
+//   }
+//   return magn_x;
+// }
 
 void setup() {
   Serial.begin(9600); 
@@ -302,8 +302,8 @@ void setup() {
   pinMode(ALIGNMENT_BTN, INPUT);
   digitalWrite(ALIGNMENT_BTN, LOW);
 
-  magn_x = getMagnX();
-  Serial.print("magn_X = "); Serial.println(magn_x);
+  // magn_x = getMagnX();
+  // Serial.print("magn_X = "); Serial.println(magn_x);
 
 }
 
@@ -351,21 +351,21 @@ void loop() {
     ROLL = atan(fmod((NEW_LL_MATRIX[2][0] / NEW_LL_MATRIX[2][2]), 180.0));//(NEW_LL_MATRIX[2][0] / NEW_LL_MATRIX[2][2]);
     YAW = atan(fmod((NEW_LL_MATRIX[0][1] / NEW_LL_MATRIX[1][1]), 360.0));//(NEW_LL_MATRIX[0][1] / NEW_LL_MATRIX[1][1]);
 
-    // Serial.print("PITCH_0 = "); Serial.print(PITCH_0 * 180.0 / M_PI, 6); Serial.print("    ROLL_0 = "); Serial.print(ROLL_0 * 180.0 / M_PI, 6); Serial.print("    YAW_0 = "); Serial.println(YAW_0 * 180.0 / M_PI, 6);
+    Serial.print("PITCH_0 = "); Serial.print(PITCH_0 * 180.0 / M_PI, 6); Serial.print("    ROLL_0 = "); Serial.print(ROLL_0 * 180.0 / M_PI, 6); Serial.print("    YAW_0 = "); Serial.println(YAW_0 * 180.0 / M_PI, 6);
 
-    // Serial.print("aX = "); Serial.print(Acc_matrix_ENUp[0][0]); Serial.print("    aY = "); Serial.print(Acc_matrix_ENUp[1][0]); Serial.print("    aZ = "); Serial.println(Acc_matrix_ENUp[2][0]);
+    Serial.print("aX = "); Serial.print(Acc_matrix_ENUp[0][0]); Serial.print("    aY = "); Serial.print(Acc_matrix_ENUp[1][0]); Serial.print("    aZ = "); Serial.println(Acc_matrix_ENUp[2][0]);
 
-    // Serial.print("X1 = "); Serial.print(X); Serial.print("    Y1 = "); Serial.print(Y); Serial.print("    Z1 = "); Serial.println(Z);
+    Serial.print("X1 = "); Serial.print(X); Serial.print("    Y1 = "); Serial.print(Y); Serial.print("    Z1 = "); Serial.println(Z);
 
-    // for(int i = 0; i < 3; i++){
-    //   for(int j = 0; j < 3; j++){
-    //     Serial.println(NEW_LL_MATRIX[i][j], 6);
-    //   }
-    // }
+    for(int i = 0; i < 3; i++){
+      for(int j = 0; j < 3; j++){
+        Serial.println(NEW_LL_MATRIX[i][j], 6);
+      }
+    }
 
-    // Serial.print("C_0 = "); Serial.println(C_0, 6);
+    Serial.print("C_0 = "); Serial.println(C_0, 6);
 
-    // Serial.print("PITCH = "); Serial.print(PITCH * 180.0 / M_PI, 6); Serial.print("    ROLL = "); Serial.print(ROLL * 180.0 / M_PI, 6); Serial.print("    YAW = "); Serial.println(YAW * 180.0 / M_PI, 6);
+    Serial.print("PITCH = "); Serial.print(PITCH * 180.0 / M_PI, 6); Serial.print("    ROLL = "); Serial.print(ROLL * 180.0 / M_PI, 6); Serial.print("    YAW = "); Serial.println(YAW * 180.0 / M_PI, 6);
 
   }
 
@@ -418,11 +418,11 @@ void loop() {
     ROLL = atan(fmod((NEW_LL_MATRIX[2][0] / NEW_LL_MATRIX[2][2]), 180.0));//(NEW_LL_MATRIX[2][0] / NEW_LL_MATRIX[2][2]);
     YAW = atan(fmod((NEW_LL_MATRIX[0][1] / NEW_LL_MATRIX[1][1]), 360.0));//(NEW_LL_MATRIX[0][1] / NEW_LL_MATRIX[1][1]);
     
-    // Serial.print("X = "); Serial.print(X); Serial.print("    Y = "); Serial.print(Y); Serial.print("    Z = "); Serial.print(Z); 
-    // Serial.print("    PITCH = "); Serial.print(PITCH * 180.0 / M_PI, 6); Serial.print("    ROLL = "); Serial.print(ROLL * 180.0 / M_PI, 6); Serial.print("    YAW = "); Serial.println(YAW * 180.0 / M_PI, 6);
+    Serial.print("X = "); Serial.print(X); Serial.print("    Y = "); Serial.print(Y); Serial.print("    Z = "); Serial.print(Z); 
+    Serial.print("    PITCH = "); Serial.print(PITCH * 180.0 / M_PI, 6); Serial.print("    ROLL = "); Serial.print(ROLL * 180.0 / M_PI, 6); Serial.print("    YAW = "); Serial.println(YAW * 180.0 / M_PI, 6);
 
-    magn_x = getMagnX();
-    Serial.print("magn_X = "); Serial.println(magn_x);
+    // magn_x = getMagnX();
+    // Serial.print("magn_X = "); Serial.println(magn_x);
 
     flag = 0;
   }
